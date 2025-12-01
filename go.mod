@@ -1,4 +1,4 @@
-module cmd/app
+module github.com/sharlottekoren/go-blueprint
 
 go 1.25.4
 
