@@ -16,7 +16,7 @@ type User struct {
 
 func NewUser(name, email, id string) (*User, error) {
 	// Validate name
-	matched, err := regexp.MatchString(`^[A-Za-zÀ-ÖØ-öø-ÿ'\\- ]{2,50}$`, name)
+	matched, err := regexp.MatchString("^[A-Za-zÀ-ÖØ-öø-ÿ'\\- ]{2,50}$", name)
 	if err != nil {
 		return nil, fmt.Errorf("error validating name: %w", err)
 	}
