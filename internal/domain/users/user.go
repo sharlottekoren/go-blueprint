@@ -44,3 +44,8 @@ func NewUser(name, email, id string) (*User, error) {
 		id:    id,
 	}, nil
 }
+
+// GetID returns the user's ID.
+func (user *User) GetID() string {
+	return user.id
+}
