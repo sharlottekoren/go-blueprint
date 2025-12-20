@@ -18,6 +18,7 @@ func NewService(userRepo UserRepository) *Service {
 	}
 }
 
+// GetUserByID retrieves a user by their ID using the UserRepository.
 func (s *Service) GetUserByID(id string) (*users.User, error) {
 	user, err := s.userRepo.GetUserByID(id)
 	if err != nil {

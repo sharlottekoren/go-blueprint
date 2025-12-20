@@ -11,6 +11,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
+// TestService tests the Service struct's methods.
 func TestService(t *testing.T) {
 	test := assert.New(t)
 
@@ -52,17 +53,20 @@ func TestService(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.testName, func(t *testing.T) {
+			// Initialise service with mock repository
 			mockUserRepo := tc.mockUserRepoFn()
 			svc := NewService(mockUserRepo)
+			// Call GetUserByID
 			user, err := svc.GetUserByID(tc.userID)
 
+			// If error is expected, check it contains the expected substring
 			if err != nil {
 				if tc.errContains != "" {
 					test.Contains(err.Error(), tc.errContains)
 				} else {
 					t.Fatalf("unexpected error: %v", err)
 				}
-			} else {
+			} else { // If no error is expected, check the returned user matches expected user
 				if tc.errContains != "" {
 					t.Fatalf("expected error containing %q, but got nil", tc.errContains)
 				}
