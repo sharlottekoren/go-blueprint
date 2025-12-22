@@ -2,7 +2,9 @@ package service
 
 import (
 	"fmt"
+	"context"
 
+	"github.com/google/uuid"
 	"github.com/sharlottekoren/go-blueprint/internal/domain/users"
 )
 
@@ -15,7 +17,6 @@ type Service struct {
 type CreateUserRequest struct {
 	Name  string
 	Email string
-	ID    string
 }
 
 // NewService creates a new instance of Service with the provided UserRepository.
@@ -26,7 +27,7 @@ func NewService(userRepo UserRepository) *Service {
 }
 
 // GetUserByID retrieves a user by their ID using the UserRepository.
-func (s *Service) GetUserByID(id string) (*users.User, error) {
+func (s *Service) GetUserByID(ctx context.Context, id string) (*users.User, error) {
 	user, err := s.userRepo.GetUserByID(id)
 	if err != nil {
 		return nil, fmt.Errorf("repository returned an error: %w", err)
@@ -35,9 +36,10 @@ func (s *Service) GetUserByID(id string) (*users.User, error) {
 }
 
 // CreateUser creates a new user and saves it using the UserRepository.
-func (s *Service) CreateUser(req CreateUserRequest) (*users.User, error) {
+func (s *Service) CreateUser(ctx context.Context, req CreateUserRequest) (*users.User, error) {
 	// Create a new user instance
-	newUser, err := users.NewUser(req.Name, req.Email, req.ID)
+	uid := uuid.New()
+	newUser, err := users.NewUser(req.Name, req.Email, uid.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user object: %w", err)
 	}
