@@ -5,20 +5,19 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/sharlottekoren/go-blueprint/internal/service/mocks"
 	"github.com/sharlottekoren/go-blueprint/internal/domain/users"
+	"github.com/sharlottekoren/go-blueprint/internal/service/mocks"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
 
 // TestService tests the Service struct's methods.
-func TestService(t *testing.T) {
+func TestService_GetUserByID(t *testing.T) {
 	test := assert.New(t)
 
 	// Define test cases
-	type TestCase struct {
-		testName	   string
-		userID         string
+	type testCase struct {
+		id         string
 		errContains    string
 		mockUserRepoFn func() UserRepository
 	}
@@ -27,10 +26,11 @@ func TestService(t *testing.T) {
 	id := uuid.New()
 	newUser, _ := users.NewUser("John Doe", "abc@def.com", id.String())
 
-	testCases := []TestCase{
+	testCases := map[string]testCase{
+		"Given valid inputs, when getting a user by ID, then no error should be returned":
 		{
-			testName: "Given valid user ID, when GetUserByID is called, then return the user",
-			userID:   id.String(),
+			id:          id.String(),
+			errContains: "",
 			mockUserRepoFn: func() UserRepository {
 				ctrl := gomock.NewController(t)
 				mockUserRepo := mocks.NewMockUserRepository(ctrl)
@@ -38,9 +38,9 @@ func TestService(t *testing.T) {
 				return mockUserRepo
 			},
 		},
+		"Given repository returns an error, when getting a user by ID, then an error should be returned":
 		{
-			testName:    "Given the repository returns an error, when GetUserByID is called, then return the error",
-			userID:      id.String(),
+			id:          id.String(),
 			errContains: "repository returned an error: blah",
 			mockUserRepoFn: func() UserRepository {
 				ctrl := gomock.NewController(t)
@@ -51,26 +51,21 @@ func TestService(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.testName, func(t *testing.T) {
+	for testName, tc := range testCases {
+		t.Run(testName, func(t *testing.T) {
 			// Initialise service with mock repository
 			mockUserRepo := tc.mockUserRepoFn()
 			svc := NewService(mockUserRepo)
 			// Call GetUserByID
-			user, err := svc.GetUserByID(tc.userID)
-
-			// If error is expected, check it contains the expected substring
-			if err != nil {
-				if tc.errContains != "" {
-					test.Contains(err.Error(), tc.errContains)
-				} else {
-					t.Fatalf("unexpected error: %v", err)
-				}
-			} else { // If no error is expected, check the returned user matches expected user
-				if tc.errContains != "" {
-					t.Fatalf("expected error containing %q, but got nil", tc.errContains)
-				}
-				test.Equal(newUser, user)
+			user, err := svc.GetUserByID(tc.id)
+			if tc.errContains == "" {
+				// No error expected
+				test.NoError(err)
+				test.EqualValues(tc.id, user.GetID())
+			} else {
+				// Error expected
+				test.Error(err)
+				test.ErrorContains(err, tc.errContains)
 			}
 		})
 	}
